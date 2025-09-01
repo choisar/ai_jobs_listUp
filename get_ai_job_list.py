@@ -1,11 +1,16 @@
 # pip install pandas openpyxl bs4
 
 import pandas as pd
-import openpyxl
 from bs4 import BeautifulSoup
+from datetime import date
 
-file_path = 'a_tag_list.xlsx'
-output_filename = "ai_jobs_captured_list_2025-08-26.xlsx"
+today = date.today()
+formatted_date1 = today.strftime("%Y%m%d")
+formatted_date2 = today.strftime("%Y-%m-%d")
+
+
+file_path = f'sheets/SINGLE_{formatted_date1}.xlsx'
+output_filename = f'sheets/ai_jobs_captured_list_{formatted_date2}.xlsx'
 
 df = pd.read_excel(file_path)
 

@@ -121,7 +121,7 @@ def call_local_llm(html_content, MODEL_NAME, portNum):
         return None
 
 def select_model():
-    models = ["gemma2:2b", "phi"]
+    models = ["gpt-oss:20b", "llama3.1:8b", "solar:latest"]
     print("사용할 모델을 선택하세요:")
     for idx, model in enumerate(models, 1):
         print(f"{idx}. {model}")

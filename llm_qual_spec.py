@@ -13,8 +13,8 @@ formatted_date = today.strftime("%Y-%m-%d")
 # --- 사용자 설정 영역 ---
 # 로컬에서 실행 중인 gpt-oss 모델의 API 엔드포인트 주소를 입력하세요.
 # (예: Ollama, vLLM 등이 제공하는 OpenAI 호환 엔드포인트)
-API_URL = "http://localhost:11434/v1/chat/completions"  # 실제 환경에 맞게 수정하세요.
-MODEL_NAME = "gpt-oss"  # 사용 중인 로컬 모델의 이름을 입력하세요.
+# API_URL = "http://localhost:11434/v1/chat/completions"  # 실제 환경에 맞게 수정하세요.
+# MODEL_NAME = "gpt-oss"  # 사용 중인 로컬 모델의 이름을 입력하세요.
 # -----------------------
 
 
@@ -55,7 +55,10 @@ def extract_main_content(html_source):
     return new_soup.get_text(separator=" ", strip=True)
 
 
-def call_local_llm(html_content):
+def call_local_llm(html_content, MODEL_NAME, portNum):
+    
+    API_URL = f"http://localhost:{portNum}/v1/chat/completions"
+    
     """
     로컬 LLM에 정제된 텍스트를 보내 자격요건과 우대사항을 추출합니다.
     """
@@ -117,8 +120,29 @@ def call_local_llm(html_content):
         print(f"  -> 받은 내용: {content_str[:300]}")  # 받은 내용 일부 출력
         return None
 
+def select_model():
+    models = ["gemma2:2b", "phi"]
+    print("사용할 모델을 선택하세요:")
+    for idx, model in enumerate(models, 1):
+        print(f"{idx}. {model}")
+    while True:
+        try:
+            choice = int(input("번호 입력: "))
+            if 1 <= choice <= len(models):
+                return models[choice - 1]
+            else:
+                print("올바른 번호를 입력하세요.")
+        except ValueError:
+            print("숫자를 입력하세요.")
 
 def main():
+    
+    try:
+        portNum = int(input("Ollama 서버 포트 번호를 입력하세요 (기본값 11434): ") or "11434")
+    except ValueError:
+        portNum = 11434
+        
+    MODEL_NAME = select_model()
     
     today = date.today()
     formatted_date = today.strftime("%Y-%m-%d")
@@ -171,7 +195,7 @@ def main():
 
             # LLM을 호출하여 정보 추출
             print("  -> LLM 호출하여 정보 추출 중...")
-            extracted_info = call_local_llm(main_text)
+            extracted_info = call_local_llm(main_text, MODEL_NAME, portNum)
 
             if extracted_info:
                 # LLM의 응답을 직접 출력하여 확인
@@ -200,7 +224,7 @@ def main():
         # "지원 링크"를 기준으로 원본과 결과 병합
         final_df = pd.merge(df, result_df, on="지원 링크", how="left")
 
-        output_filename = f'sheets/ai_jobs_final_results_{formatted_date}.xlsx'
+        output_filename = f'sheets/ai_jobs_final_results_{formatted_date}_{MODEL_NAME}.xlsx'
         final_df.to_excel(output_filename, index=False)
         print(f"\n작업 완료! 결과가 '{output_filename}' 파일에 저장되었습니다.")
     else:

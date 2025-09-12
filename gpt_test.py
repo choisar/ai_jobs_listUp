@@ -2,13 +2,32 @@
 import requests
 import json
 
-# Ollama API 엔드포인트 및 모델 이름 설정
-API_URL = "http://localhost:11434/v1/chat/completions"
-MODEL_NAME = "gpt-oss"
+def select_model():
+    models = ["gemma2:2b", "phi"]
+    print("사용할 모델을 선택하세요:")
+    for idx, model in enumerate(models, 1):
+        print(f"{idx}. {model}")
+    while True:
+        try:
+            choice = int(input("번호 입력: "))
+            if 1 <= choice <= len(models):
+                return models[choice - 1]
+            else:
+                print("올바른 번호를 입력하세요.")
+        except ValueError:
+            print("숫자를 입력하세요.")
 
 def test_ollama_api():
+    try:
+        portNum = int(input("Ollama 서버 포트 번호를 입력하세요 (기본값 11434): ") or "11434")
+    except ValueError:
+        portNum = 11434
+
+    API_URL = f"http://localhost:{portNum}/v1/chat/completions"
+    MODEL_NAME = select_model()
+    
     """
-    Ollama gpt-oss 모델 API를 테스트하는 함수
+    Ollama serve API를 테스트하는 함수
     """
     headers = {
         "Content-Type": "application/json"
